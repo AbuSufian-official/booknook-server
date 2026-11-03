@@ -56,6 +56,14 @@ app.patch("/books/:id",async(req,res)=>{
     const result = await DBcollection.updateOne(idd, updateDoc, option);
     res.send(result)
 })
+app.delete("/books/:id", async (req, res) => {
+    const query = { _id: new ObjectId(req.params.id) }
+    const deleteData = await DBcollection.deleteOne(query);
+    res.send({success:true})
+})
+
+
+
 
 
 
