@@ -41,6 +41,51 @@ app.get("/books/:id",async(req,res)=>{
   const findOneData=await DBcollection.findOne(query)
   res.send(findOneData)
 })
+
+app.patch("/books/:id",async(req,res)=>{
+    const idd={_id:new ObjectId(req.params.id)}
+    const body=req.body
+    const option={upsert:true}
+    const updateDoc = {
+      $set: {
+        title:body.title,
+        copies:body?.copies,
+        description:body.description
+      }
+    }
+    const result = await DBcollection.updateOne(idd, updateDoc, option);
+    res.send(result)
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 app.listen(port,()=>{
     console.log(`server is running ${port}`)
 })
