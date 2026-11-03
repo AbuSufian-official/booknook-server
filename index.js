@@ -1,7 +1,7 @@
 import 'dotenv/config'
 import express from "express"
 import cors from "cors"
-import { MongoClient } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
 
 
 
@@ -36,7 +36,11 @@ app.get("/books",async(req,res)=>{
     const findData=await DBcollection.find({}).toArray()
     res.send(findData)
 })
-
+app.get("/books/:id",async(req,res)=>{
+  const query={_id: new ObjectId(req.params.id)}
+  const findOneData=await DBcollection.findOne(query)
+  res.send(findOneData)
+})
 app.listen(port,()=>{
     console.log(`server is running ${port}`)
 })
