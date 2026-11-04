@@ -23,6 +23,7 @@ export async function connectToMongoDB() {
 const connectClient = await connectToMongoDB()
 const DB = connectClient.db("booknook")
 const DBcollection = DB.collection("booknookAllbook")
+const Borrowcolletion=DB.collection("borrowcolletion")
 
 app.get("/", (req, res) => {
   res.send({ massage: "booknook server is successfully running....." })
@@ -67,36 +68,35 @@ app.patch("/books/:id", async (req, res) => {
   }
   if (req.body.borrow == "Doborrow") {
     const iddd = { _id: new ObjectId(req.params.id) }
-    
     const updateData = {
       $inc: { copies: -1 }
     }
     const reesult = await DBcollection.updateOne(iddd, updateData);
     res.send(reesult)
-   
-
-  } else {
+  }else {
     const result = await DBcollection.updateOne(idd, updateDoc, option);
     res.send(result)
   }
 
 })
-// app.patch("/books/:id",async(req,res)=>{
-//     const idd={_id:new ObjectId(req.params.id)}
-//     const body=req.body
-//     const option={upsert:true}
-//     const updateDoc = {
-//       $inc: {
-//         title:body.title,
-//       }
-//     }
-//     const result = await DBcollection.updateOne(idd, updateDoc, option);
-//     res.send(result)
-// })
+
 app.delete("/books/:id", async (req, res) => {
   const query = { _id: new ObjectId(req.params.id) }
   const deleteData = await DBcollection.deleteOne(query);
   res.send({ success: true })
+})
+
+
+app.post("/borrows",async(req,res)=>{
+
+  const obj={...req.body,_id: new ObjectId(req.body._id)}
+  const insertDataDB = await Borrowcolletion.insertOne(obj)
+  res.send({success:true})
+})
+
+app.get("/borrows",async(req,res)=>{
+  const findData = await Borrowcolletion.find({}).toArray()
+  res.send(findData)
 })
 
 
