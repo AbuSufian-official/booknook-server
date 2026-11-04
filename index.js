@@ -23,26 +23,26 @@ export async function connectToMongoDB() {
 const connectClient = await connectToMongoDB()
 const DB = connectClient.db("booknook")
 const DBcollection = DB.collection("booknookAllbook")
-const Borrowcolletion=DB.collection("borrowcolletion")
+const Borrowcolletion = DB.collection("borrowcolletion")
 
 app.get("/", (req, res) => {
   res.send({ massage: "booknook server is successfully running....." })
 })
 app.post("/books", async (req, res) => {
   res.send({ success: true, massage: "successfully send data" })
-const obj={
-  title: req.body.title,
-  author: req.body.author,
-  copies: Number(req.body.copies),
-  category: req.body.category,
-  image: req.body.image,
-  description: req.body.description,
-  userName: req.body.userName,
-  userEmail: req.body.userEmail,
-  _id: req.body._id
-}
+  const obj = {
+    title: req.body.title,
+    author: req.body.author,
+    copies: Number(req.body.copies),
+    category: req.body.category,
+    image: req.body.image,
+    description: req.body.description,
+    userName: req.body.userName,
+    userEmail: req.body.userEmail,
+    _id: req.body._id
+  }
   const insertDataDB = await DBcollection.insertOne(obj)
-  
+
 
 })
 app.get("/books", async (req, res) => {
@@ -66,14 +66,16 @@ app.patch("/books/:id", async (req, res) => {
       description: body.description
     }
   }
-  if (req.body.borrow == "Doborrow") {
-    const iddd = { _id: new ObjectId(req.params.id) }
+  if ((req.body.borrow == "Doborrow") && (req.body.copies > 0)) {
+    const iddd = { title: req.body.title }
     const updateData = {
       $inc: { copies: -1 }
     }
     const reesult = await DBcollection.updateOne(iddd, updateData);
     res.send(reesult)
-  }else {
+  } else if ((req.body.borrow == "Doborrow") && (req.body.copies == 0)) {
+    return null
+  } else {
     const result = await DBcollection.updateOne(idd, updateDoc, option);
     res.send(result)
   }
@@ -87,14 +89,14 @@ app.delete("/books/:id", async (req, res) => {
 })
 
 
-app.post("/borrows",async(req,res)=>{
+app.post("/borrows", async (req, res) => {
 
-  const obj={...req.body,_id: new ObjectId(req.body._id)}
+  const obj = { ...req.body, _id: new ObjectId(req.body._id) }
   const insertDataDB = await Borrowcolletion.insertOne(obj)
-  res.send({success:true})
+  res.send({ success: true })
 })
 
-app.get("/borrows",async(req,res)=>{
+app.get("/borrows", async (req, res) => {
   const findData = await Borrowcolletion.find({}).toArray()
   res.send(findData)
 })
