@@ -25,6 +25,25 @@ const DB = connectClient.db("booknook")
 const DBcollection = DB.collection("booknookAllbook")
 const Borrowcolletion = DB.collection("borrowcolletion")
 
+
+const handleauth=(req,res,next)=>{
+  const isuserlogin=req.headers?.authorization
+if(isuserlogin=="userLogin"){
+    next()
+  }else{
+    return res.send({massage:"user is not login"})
+  }
+}
+
+
+
+
+
+
+
+
+
+
 app.get("/", (req, res) => {
   res.send({ massage: "booknook server is successfully running....." })
 })
@@ -46,13 +65,22 @@ app.post("/books", async (req, res) => {
 
 })
 app.get("/books", async (req, res) => {
+
   const findData = await DBcollection.find({}).toArray()
   res.send(findData)
+
+
 })
-app.get("/books/:id", async (req, res) => {
+app.get("/books/:id",handleauth,async (req, res) => {
+
+
+
   const query = { _id: new ObjectId(req.params.id) }
   const findOneData = await DBcollection.findOne(query)
+  
+  
   res.send(findOneData)
+
 })
 
 app.patch("/books/:id", async (req, res) => {
