@@ -2,6 +2,7 @@ import 'dotenv/config'
 import express from "express"
 import cors from "cors"
 import { MongoClient, ObjectId } from 'mongodb';
+import { createRemoteJWKSet, jwtVerify } from 'jose';
 
 
 
@@ -26,20 +27,31 @@ const DBcollection = DB.collection("booknookAllbook")
 const Borrowcolletion = DB.collection("borrowcolletion")
 
 
-const handleauth=(req,res,next)=>{
-  const isuserlogin=req.headers?.authorization
-if(isuserlogin=="userLogin"){
-    next()
-  }else{
-    return res.send({massage:"user is not login"})
+const handleauth = async (req, res, next) => {
+  const token = req.headers?.authorization
+
+  if (Boolean(token) == false) {
+    res.status(401).send({ massage: "unauthorize user" })
   }
+  // if(isuserlogin=="userLogin"){
+  //     next()
+  //   }else{
+  //     return res.send({massage:"user is not login"})
+  //   }
+
+
+  const JWKS = createRemoteJWKSet(new URL(`${process.env.BOOKNOOK_URL}/api/auth/jwks`))
+
+  try {
+    const { payload } = await jwtVerify(token, JWKS)
+    next()
+  } catch (error) {
+    res.status(401).send({ massage: "server error" })
+  }
+  
+
+
 }
-
-
-
-
-
-
 
 
 
@@ -47,7 +59,7 @@ if(isuserlogin=="userLogin"){
 app.get("/", (req, res) => {
   res.send({ massage: "booknook server is successfully running....." })
 })
-app.post("/books", async (req, res) => {
+app.post("/books",handleauth, async (req, res) => {
   res.send({ success: true, massage: "successfully send data" })
   const obj = {
     title: req.body.title,
@@ -71,19 +83,19 @@ app.get("/books", async (req, res) => {
 
 
 })
-app.get("/books/:id",handleauth,async (req, res) => {
+app.get("/books/:id", handleauth, async (req, res) => {
 
 
 
   const query = { _id: new ObjectId(req.params.id) }
   const findOneData = await DBcollection.findOne(query)
-  
-  
+
+
   res.send(findOneData)
 
 })
 
-app.patch("/books/:id", async (req, res) => {
+app.patch("/books/:id",handleauth, async (req, res) => {
   const idd = { _id: new ObjectId(req.params.id) }
   const body = req.body
   const option = { upsert: true }
@@ -119,25 +131,25 @@ app.patch("/books/:id", async (req, res) => {
 
 })
 
-app.delete("/books/:id", async (req, res) => {
+app.delete("/books/:id",handleauth, async (req, res) => {
   const query = { _id: new ObjectId(req.params.id) }
   const deleteData = await DBcollection.deleteOne(query);
   res.send({ success: true })
 })
 
 
-app.post("/borrows", async (req, res) => {
+app.post("/borrows", handleauth,async (req, res) => {
 
   const obj = { ...req.body }
   const insertDataDB = await Borrowcolletion.insertOne(obj)
   res.send({ success: true })
 })
 
-app.get("/borrows", async (req, res) => {
+app.get("/borrows",handleauth, async (req, res) => {
   const findData = await Borrowcolletion.find({}).toArray()
   res.send(findData)
 })
-app.delete("/borrows/:id", async (req, res) => {
+app.delete("/borrows/:id",handleauth, async (req, res) => {
   const query = { _id: new ObjectId(req.params.id) }
   const deleteData = await Borrowcolletion.deleteOne(query);
   res.send({ success: true })
