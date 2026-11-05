@@ -158,38 +158,8 @@ app.delete("/borrows/:id",handleauth, async (req, res) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 app.listen(port, () => {
   console.log(`server is running ${port}`)
 })
+
+export default app
